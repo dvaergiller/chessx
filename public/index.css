@@ -1,0 +1,156 @@
+body {
+    background: hsl(0, 0%, 80%);
+}
+
+main {
+    height: 100svh;
+}
+
+button {
+    display: block;
+}
+
+.main-menu {
+    margin: auto;
+    margin-top: 10rem;
+    width: max-content;
+    border-radius: .5rem;
+    position: relative;
+    height: 15rem;
+    width: 20rem;
+}
+
+.custom-radio {
+    appearance: none;
+    display: none;
+}
+
+label {
+    display: block;
+}
+
+.menu-tab-label {
+    background: hsl(0, 0%, 90%);
+    display: inline-block;
+    height: 3rem;
+    width: 49%;
+    text-align: center;
+    padding: 0;
+    border-radius: 5px 5px 0 0;
+}
+
+.tab-content {
+    display: none;
+    background: hsl(0, 0%, 95%);
+    width: 100%;
+    height: 100%;
+    border-radius: 0 0 5px 5px;
+}
+
+#team-select-white {
+    width: 5rem;
+    aspect-ratio: 1;
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg");
+    background-size: cover;
+    display: inline-block;
+    margin-top: 1rem;
+}
+
+#team-select-black {
+    width: 5rem;
+    aspect-ratio: 1;
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg");
+    background-size: cover;
+    display: inline-block;
+}
+
+.tab-switch:checked + .menu-tab-label {
+    background: hsl(0, 0%, 95%);
+}
+
+.custom-radio:checked + .team-select-label {
+    border: 2px solid blue;
+}
+
+.tab-switch:checked + label + .tab-content {
+    display: block;
+    position: absolute;
+    padding: 1rem;
+    top: 3rem;
+    left: 0;
+}
+
+.board {
+    max-width: 90%;
+    max-height: 90svh;
+    margin: auto;
+    margin-top: 5svh;
+    aspect-ratio: 1;
+    position: relative;
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/c/cc/Board_empty.png");
+    background-size: cover;
+    padding: 5rem;
+    --pos-min: 2%;
+    --square-size: calc(96% / 8);
+}
+
+.piece {
+    background: transparent;
+    width: var(--square-size);
+    aspect-ratio: 1;
+    position: absolute;
+    background-size: cover;
+    z-index: 1;
+    transition: all 0.5s ease-in-out;
+}
+
+.move {
+    width: var(--square-size);
+    aspect-ratio: 1;
+    border: 3px solid blue;
+    position: absolute;
+    z-index: 2;
+}
+
+[data-team="black"][data-type="king"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg"); }
+[data-team="black"][data-type="queen"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/4/47/Chess_qdt45.svg"); }
+[data-team="black"][data-type="bishop"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/9/98/Chess_bdt45.svg"); }
+[data-team="black"][data-type="knight"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg"); }
+[data-team="black"][data-type="rook"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg"); }
+[data-team="black"][data-type="pawn"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg"); }
+[data-team="white"][data-type="king"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg"); }
+[data-team="white"][data-type="queen"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg"); }
+[data-team="white"][data-type="bishop"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg"); }
+[data-team="white"][data-type="knight"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg"); }
+[data-team="white"][data-type="rook"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg"); }
+[data-team="white"][data-type="pawn"] {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg"); }
+
+[data-column="a"] { left: calc(var(--pos-min) + 0 * var(--square-size)) }
+[data-column="b"] { left: calc(var(--pos-min) + 1 * var(--square-size)) }
+[data-column="c"] { left: calc(var(--pos-min) + 2 * var(--square-size)) }
+[data-column="d"] { left: calc(var(--pos-min) + 3 * var(--square-size)) }
+[data-column="e"] { left: calc(var(--pos-min) + 4 * var(--square-size)) }
+[data-column="f"] { left: calc(var(--pos-min) + 5 * var(--square-size)) }
+[data-column="g"] { left: calc(var(--pos-min) + 6 * var(--square-size)) }
+[data-column="h"] { left: calc(var(--pos-min) + 7 * var(--square-size)) }
+
+[data-row="1"] { bottom: calc(var(--pos-min) + 0 * var(--square-size)) }
+[data-row="2"] { bottom: calc(var(--pos-min) + 1 * var(--square-size)) }
+[data-row="3"] { bottom: calc(var(--pos-min) + 2 * var(--square-size)) }
+[data-row="4"] { bottom: calc(var(--pos-min) + 3 * var(--square-size)) }
+[data-row="5"] { bottom: calc(var(--pos-min) + 4 * var(--square-size)) }
+[data-row="6"] { bottom: calc(var(--pos-min) + 5 * var(--square-size)) }
+[data-row="7"] { bottom: calc(var(--pos-min) + 6 * var(--square-size)) }
+[data-row="8"] { bottom: calc(var(--pos-min) + 7 * var(--square-size)) }
