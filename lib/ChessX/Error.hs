@@ -41,7 +41,10 @@ toServerError valM = do
     Left (BadRequest msg) ->
       throwError $ err400 { errBody = fromStrict $ encodeUtf8 msg }
     Left (RedirectWithToken to token) ->
-      throwError $ err301 { errHeaders = [ ("Location", encodeUtf8 to)
-                                         , ("Set-Cookie", encodeUtf8 token)] }
+      let headers =
+            [ ("Location", encodeUtf8 to)
+            , ("Set-Cookie",
+               "token=" <> encodeUtf8 token <> ";SameSite=strict")]
+      in throwError $ err301 { errHeaders = headers }
     Right val ->
       return val
