@@ -16,6 +16,7 @@ import System.Random
 
 import ChessX.Board
 import ChessX.Error
+import ChessX.Token
 
 type ServerState = M.Map BoardId Board
 type StateVar = MVar ServerState
@@ -44,13 +45,19 @@ withServerState updater = do
   liftIO $ putMVar stateVar newState
   return toReturn
 
-updateBoard :: (MonadIO m, MonadError Error m)
-            => BoardId -> (Board -> m Board) -> GameT m Board
-updateBoard bId updater = withServerState $ \state -> do
+withBoard :: (MonadIO m, MonadError Error m)
+          => BoardId -> (Board -> m (Board, a)) -> GameT m a
+withBoard bId updater = withServerState $ \state -> do
   let maybeBoard = M.lookup bId state
   board <- maybe (throwError $ NotFound "Board not found") return maybeBoard
+  (newBoard, toReturn) <- updater board
+  return (M.insert bId newBoard state, toReturn)
+
+updateBoard :: (MonadIO m, MonadError Error m)
+            => BoardId -> (Board -> m Board) -> GameT m Board
+updateBoard bId updater = withBoard bId $ \board -> do
   newBoard <- updater board
-  return (M.insert bId newBoard state, newBoard)
+  return (newBoard, newBoard)
 
 createBoard :: (MonadIO m, MonadError Error m) => GameT m Board
 createBoard = do
@@ -68,24 +75,13 @@ getBoard bId = withServerState $ \state ->
     Just board ->
       return (state, board)
 
-findBoard :: (MonadIO m, MonadError Error m) => Token -> GameT m Board
-findBoard token = withServerState $ \state ->
-  case find hasToken (M.elems state) of
-    Nothing ->
-      throwError $ NotFound "No board with such token"
-    Just board ->
-      return (state, board)
-  where hasToken board =
-          fmap playerToken (playerWhite board) == Just token
-          || fmap playerToken (playerBlack board) == Just token
-
 -- Board operations:
 
 joinBoard :: (MonadIO m, MonadError Error m)
           => Text -> Team -> Board -> m (Board, Token)
 joinBoard name team board = do
   let tokenLen = 20
-  token <- fmap (encodeBase64 . pack) . liftIO $ replicateM tokenLen randomIO
+  token <- mkNewToken
   if | team == White && isNothing (playerWhite board) ->
          return (board { playerWhite = Just (Player name token) }, token)
      | team == Black && isNothing (playerBlack board) ->  

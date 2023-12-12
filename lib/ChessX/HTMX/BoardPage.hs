@@ -7,11 +7,19 @@ import Text.Blaze.Html5
 
 import ChessX.Board
 
-newtype BoardPage = BoardPage { boardId :: BoardId }
+data BoardPage = BoardPage
+  { boardId :: BoardId
+  , asTeam :: Maybe Team
+  }
 
 instance ToMarkup BoardPage where
-  toMarkup (BoardPage bId) =
-    [hsx|
+  toMarkup (BoardPage bId asTeam) =
+    let asTeamStr =
+          case asTeam of
+            Just White -> "white" :: String
+            Just Black -> "black"
+            Nothing -> "none"
+    in [hsx|
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,6 +35,9 @@ instance ToMarkup BoardPage where
 </head>
 <body>
   <main>
+    <div class="game-state"
+         data-as-team={ asTeamStr } >
+    </div>
     <div class="board"
          hx-get={ "/api/board/" ++ show bId }
          hx-swap="outerHTML"

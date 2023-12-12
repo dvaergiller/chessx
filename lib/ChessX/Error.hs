@@ -19,7 +19,6 @@ type ErrorT = ExceptT Error
 data Error =
     NotFound Text
   | BadRequest Text
-  | RedirectWithToken Text Token
 
 instance {-# OVERLAPPABLE #-}
   (Monad (t m),
@@ -40,11 +39,5 @@ toServerError valM = do
       throwError $ err404 { errBody = fromStrict $ encodeUtf8 msg }
     Left (BadRequest msg) ->
       throwError $ err400 { errBody = fromStrict $ encodeUtf8 msg }
-    Left (RedirectWithToken to token) ->
-      let headers =
-            [ ("Location", encodeUtf8 to)
-            , ("Set-Cookie",
-               "token=" <> encodeUtf8 token <> ";SameSite=strict")]
-      in throwError $ err301 { errHeaders = headers }
     Right val ->
       return val

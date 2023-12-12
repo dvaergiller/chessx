@@ -38,12 +38,14 @@ library
       ChessX.API
       ChessX.Server
       ChessX.Error
+      ChessX.Token
     build-depends:
       base ^>=4.17.2.0,
       base64,
       blaze-html,
       bytestring,
       containers,
+      cookie,
       http-api-data,
       http-media,
       ihp-hsx ^>= 1.1.0,

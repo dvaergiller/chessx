@@ -112,6 +112,14 @@ label {
     z-index: 2;
 }
 
+[data-as-team="black"] + .board {
+    transform: rotate(.5turn);
+}
+
+[data-as-team="black"] + .board > .pieces > .piece {
+    transform: rotate(.5turn);
+}
+
 [data-team="black"][data-type="king"] {
     background-image: url("https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg"); }
 [data-team="black"][data-type="queen"] {

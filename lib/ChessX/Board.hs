@@ -3,7 +3,9 @@ module ChessX.Board where
 import Data.List (zip, lookup)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text, singleton, pack)
-import Web.Internal.HttpApiData (FromHttpApiData(..))
+import Web.Internal.HttpApiData (FromHttpApiData(..), ToHttpApiData(..))
+
+import ChessX.Token
 
 data PieceType =
     Pawn
@@ -22,6 +24,11 @@ instance FromHttpApiData Team where
     "white" -> Right White
     "black" -> Right Black
     _ -> Left "Invalid team. Needs to be 'black' or 'white'"
+
+instance ToHttpApiData Team where
+  toUrlPiece = \case
+    White -> "white"
+    Black -> "black"
 
 type PositionRow = Int
 type PositionCol = Int
@@ -46,13 +53,13 @@ data Piece = Piece
   , position :: Position
   , hasMoved :: Bool
   }
-
-type Token = Text
+  deriving (Show)
 
 data Player = Player
   { playerName :: Text,
     playerToken :: Token
   }
+  deriving (Show)
 
 type BoardId = Int
 data Board = Board
@@ -62,6 +69,7 @@ data Board = Board
   , pieces :: [Piece]
   , turn :: Team
   }
+  deriving (Show)
 
 data Move = Move
   { boardId :: BoardId

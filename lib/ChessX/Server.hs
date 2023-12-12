@@ -6,7 +6,8 @@ import qualified Data.ByteString as BS
 import Data.List
 import Data.Maybe (isNothing)
 import Data.Text (Text, pack)
-import Network.Wai (Middleware, Request(..))
+import Data.Text.Encoding (encodeUtf8, decodeUtf8)
+import Network.Wai (Middleware, Request(..), mapResponseHeaders)
 import Servant
 
 import ChessX.API
@@ -15,14 +16,31 @@ import ChessX.Error
 import qualified ChessX.Game as Game
 import ChessX.HTMX.Index
 import ChessX.HTMX.BoardPage
+import ChessX.Token
+import Web.Cookie
+import Debug.Trace
 
 type ChessXServer = Game.GameT (ErrorT Handler)
 
 application :: IO Application
 application = do
   stateVar <- Game.initStateVar
-  return $ serve api
-         $ hoistServer api (toHandler stateVar) server
+  let app = serve api $ hoistServer api (toHandler stateVar) server
+  return $ tokenMiddleware app
+
+-- Sets a token response header in all responses,
+-- reusing the same one if already set.
+tokenMiddleware :: Application -> Application
+tokenMiddleware app req respond =
+  let existingHeader = lookup "Cookie" (requestHeaders req)
+      existingToken = existingHeader >>= lookup "token" . parseCookies
+      respond' resp = do
+        token <- maybe mkNewToken (return . Token . decodeUtf8) existingToken
+        let tokenCookie = encodeUtf8 . toUrlPiece $ TokenCookie token
+        let tokenHeader = ("Set-Cookie", tokenCookie)
+        let resp' = mapResponseHeaders (tokenHeader:) resp
+        respond resp'
+  in app req respond'
 
 toHandler :: Game.StateVar -> ChessXServer a -> Handler a
 toHandler stateVar =
@@ -36,36 +54,53 @@ server = pagesServer
     :<|> boardServer
     :<|> serveDirectoryFileServer "public"
 
+--cookieWrappedBoardServer :: Maybe Token -> ServerT BoardAPI ChessXServer
+-- cookieWrappedBoardServer maybeToken i = do
+--   token <- maybe mkNewToken return maybeToken
+--   res <- boardServer token i
+--   addHeader (TokenCookie token) res
+
 -- Endpoint handlers:
 
 pagesServer :: ServerT PagesAPI ChessXServer
 pagesServer = return Index
-         :<|> \bId -> return (BoardPage bId)
+         :<|> \bId asTeam -> return (BoardPage bId asTeam)
 
 boardServer :: ServerT BoardAPI ChessXServer
-boardServer = makeNewBoard
-         :<|> joinBoard
-         :<|> getBoard
-         :<|> selectPiece
-         :<|> movePiece
+boardServer = -- makeNewBoard
+         -- :<|> joinBoard
+         -- :<|> 
+  getBoard
+         -- :<|> selectPiece
+         -- :<|> movePiece
 
-makeNewBoard :: CreateBoardRequest
-             -> ChessXServer NoContent
+makeNewBoard ::
+     CreateBoardRequest
+  -> ChessXServer
+       (Headers '[Header "HX-Location" Text] NoContent)
 makeNewBoard (CreateBoardRequest name team) = do
-  (board, token) <- Game.createBoard >>= Game.joinBoard name team
-  let Board { boardId = bId } = board
-  throwError $ RedirectWithToken ("/board/" <> pack (show bId)) token
+  board@(Board { boardId = bId }) <- Game.createBoard
+  token <- Game.withBoard bId $ Game.joinBoard name team
+  return $ addHeader  ("/board?board_id=" <> pack (show bId)
+                       <> "&as=" <> toUrlPiece team)
+           NoContent
 
-joinBoard :: JoinBoardRequest
-          -> ChessXServer (Headers '[Header "set-cookie" Token] Board)
+joinBoard ::
+     JoinBoardRequest
+  -> ChessXServer
+       (Headers '[Header "HX-Location" Text] NoContent)
 joinBoard (JoinBoardRequest bId name) = do
-  board <- Game.getBoard bId
-  let team = if isNothing (playerWhite board) then White else Black
-  (joined, token) <- Game.joinBoard name team board
-  return $ addHeader token board
+  Game.withBoard bId $ \board -> do
+    let team = if isNothing (playerWhite board) then White else Black
+    (joined, token) <- Game.joinBoard name team board
+    trace (show joined) (return ())
+    return (joined, addHeader  ("/board?board_id=" <> pack (show bId)
+                                  <> "&as=" <> toUrlPiece team)
+                    NoContent)
 
 getBoard :: Int -> ChessXServer Board
-getBoard = Game.getBoard
+getBoard =
+  Game.getBoard
 
 selectPiece :: BoardId -> PieceId -> ChessXServer PossibleMoves
 selectPiece bId pId = do
