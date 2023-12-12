@@ -26,7 +26,7 @@ newtype TokenCookie = TokenCookie { toToken :: Token }
 
 instance ToHttpApiData TokenCookie where
   toUrlPiece token =
-    "token=" <> tokenText (toToken token) <> ";SateSite=strict"
+    "token=" <> tokenText (toToken token) <> ";SameSite=strict"
 
 type TokenCookieHeader = Header "Set-Cookie" TokenCookie
 

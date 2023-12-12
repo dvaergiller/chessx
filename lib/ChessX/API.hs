@@ -16,7 +16,6 @@ import ChessX.Token
 type API =
        PagesAPI
   :<|> "api" :> "board" :> BoardAPI
-     -- :> Header "Cookie" Token
   :<|> Raw -- Static files
 
 type PagesAPI =
@@ -27,31 +26,30 @@ type PagesAPI =
      :> Get '[HTMX] BoardPage
 
 type BoardAPI =
-  --      ReqBody '[FormUrlEncoded] CreateBoardRequest
-  --      :> Post '[HTMX] (Headers
-  --                        'Header "HX-Location" Text]
-  --                        NoContent)
+       ReqBody '[FormUrlEncoded] CreateBoardRequest
+       :> Post '[HTMX] (Headers
+                         '[Header "HX-Location" Text]
+                         NoContent)
 
-  -- :<|> "join" :> ReqBody '[FormUrlEncoded] JoinBoardRequest
-  --      :> Post '[HTMX] (Headers
-  --                        '[Header "HX-Location" Text]
-  --                        NoContent)
+  :<|> "join" :> ReqBody '[FormUrlEncoded] JoinBoardRequest
+       :> Post '[HTMX] (Headers
+                         '[Header "HX-Location" Text]
+                         NoContent)
 
-  -- :<|>
-  Capture "board_id" BoardId
+  :<|> Capture "board_id" BoardId
        :> Get '[HTMX] Board
 
-  -- :<|> Capture "board_id" BoardId
-  --      :> "select"
-  --      :> Capture "piece_id" Int
-  --      :> Get '[HTMX] PossibleMoves
+  :<|> Capture "board_id" BoardId
+       :> "select"
+       :> Capture "piece_id" Int
+       :> Get '[HTMX] PossibleMoves
 
-  -- :<|> Capture "board_id" BoardId
-  --      :> "move"
-  --      :> Capture "piece_id" Int
-  --      :> Capture "to_column" Int
-  --      :> Capture "to_row" Int
-  --      :> Get '[HTMX] Board
+  :<|> Capture "board_id" BoardId
+       :> "move"
+       :> Capture "piece_id" Int
+       :> Capture "to_column" Int
+       :> Capture "to_row" Int
+       :> Get '[HTMX] Board
 
 data CreateBoardRequest = CreateBoardRequest
   { playerName :: Text

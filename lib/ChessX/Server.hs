@@ -34,12 +34,15 @@ tokenMiddleware :: Application -> Application
 tokenMiddleware app req respond =
   let existingHeader = lookup "Cookie" (requestHeaders req)
       existingToken = existingHeader >>= lookup "token" . parseCookies
-      respond' resp = do
-        token <- maybe mkNewToken (return . Token . decodeUtf8) existingToken
-        let tokenCookie = encodeUtf8 . toUrlPiece $ TokenCookie token
-        let tokenHeader = ("Set-Cookie", tokenCookie)
-        let resp' = mapResponseHeaders (tokenHeader:) resp
-        respond resp'
+      respond' resp =
+        case existingToken of
+          Nothing -> do
+            token <- mkNewToken
+            let tokenCookie = encodeUtf8 . toUrlPiece $ TokenCookie token
+            let tokenHeader = ("Set-Cookie", tokenCookie)
+            respond $ mapResponseHeaders (tokenHeader:) resp
+          Just _ ->
+            respond resp
   in app req respond'
 
 toHandler :: Game.StateVar -> ChessXServer a -> Handler a
@@ -54,12 +57,6 @@ server = pagesServer
     :<|> boardServer
     :<|> serveDirectoryFileServer "public"
 
---cookieWrappedBoardServer :: Maybe Token -> ServerT BoardAPI ChessXServer
--- cookieWrappedBoardServer maybeToken i = do
---   token <- maybe mkNewToken return maybeToken
---   res <- boardServer token i
---   addHeader (TokenCookie token) res
-
 -- Endpoint handlers:
 
 pagesServer :: ServerT PagesAPI ChessXServer
@@ -67,12 +64,11 @@ pagesServer = return Index
          :<|> \bId asTeam -> return (BoardPage bId asTeam)
 
 boardServer :: ServerT BoardAPI ChessXServer
-boardServer = -- makeNewBoard
-         -- :<|> joinBoard
-         -- :<|> 
-  getBoard
-         -- :<|> selectPiece
-         -- :<|> movePiece
+boardServer = makeNewBoard
+         :<|> joinBoard
+         :<|> getBoard
+         :<|> selectPiece
+         :<|> movePiece
 
 makeNewBoard ::
      CreateBoardRequest

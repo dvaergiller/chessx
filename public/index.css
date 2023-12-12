@@ -107,7 +107,8 @@ label {
 .move {
     width: var(--square-size);
     aspect-ratio: 1;
-    border: 3px solid blue;
+    background: hsla(221, 60%, 66%, 40%);
+    border-radius: 50%;
     position: absolute;
     z-index: 2;
 }
