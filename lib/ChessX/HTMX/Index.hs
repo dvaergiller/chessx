@@ -5,24 +5,14 @@ import IHP.HSX.QQ
 import Servant.API (Accept(..))
 import Text.Blaze.Html5
 
+import ChessX.HTMX.PageTmpl
+
 data Index = Index
 
 instance ToMarkup Index where
-  toMarkup Index =
+  toMarkup Index = pageWith
     [hsx|
-<html lang="en">        
-<head>
-  <meta charset="UTF-8" />
-  <meta name="description" content="HTMX Demo Chess Game" />
-  <meta name="viewport" content="width=device-width" />
-  <script src="https://unpkg.com/htmx.org@1.9.9"></script>
-  <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
-  <link rel="stylesheet" href="/reset.css"/>
-  <link rel="stylesheet" href="/index.css"/>
-  <title>ChessX</title>
-  </head>
-  <body>
-    <main>
+  <main>
     <div class="main-menu">
       <input class="custom-radio tab-switch"
              id="create"
@@ -52,13 +42,17 @@ instance ToMarkup Index where
                type="radio"
                id="white"
                value="white" />
-        <label id="team-select-white" class="team-select-label" for="white"></label>
+        <label id="team-select-white"
+               class="team-select-label"
+               for="white"></label>
         <input class="custom-radio"
                name="playerTeam"
                type="radio"
                id="black"
                value="black" />
-        <label id="team-select-black" class="team-select-label" for="black"></label>
+        <label id="team-select-black"
+               class="team-select-label"
+               for="black"></label>
         <button type="submit">Create Board</button>
       </form>
       <input class="custom-radio tab-switch"
@@ -77,13 +71,13 @@ instance ToMarkup Index where
             hx-target="main"
             hx-push-url="/board.html">
          <label for="player-name">Your name</label>
-        <input id="player-name" class="main-menu-text" name="playerName" required />
+        <input id="player-name"
+               class="main-menu-text"
+               name="playerName" required />
         <label for="board-id">Board ID</label>
         <input id="board-id" class="main-menu-text" name="boardId" required />
         <button type="submit">Join Board</button>
       </form>
     </div>
   </main>
-</body>
-</html>
 |]

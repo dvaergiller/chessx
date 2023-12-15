@@ -71,6 +71,8 @@ boardServer = makeNewBoard
          :<|> selectPiece
          :<|> movePiece
 
+-- This took me a couple of days. Either the documentation is bad
+-- or I am bad.
 sseHandler bId req resp = do
   chan <- Game.withServerState $ \state -> do
     (newMap, chan) <- getChannel bId (Game.sseChannels state)

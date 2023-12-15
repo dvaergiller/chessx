@@ -33,6 +33,7 @@ library
       ChessX.Board
       ChessX.Game
       ChessX.HTMX
+      ChessX.HTMX.PageTmpl
       ChessX.HTMX.Index
       ChessX.HTMX.BoardPage
       ChessX.API
