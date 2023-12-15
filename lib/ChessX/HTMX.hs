@@ -77,9 +77,7 @@ instance ToMarkup Move where
         <div class="move"
              data-column={ columnName t }
              data-row={ rowName t }
-             hx-get={ moveUri }
-             hx-target="closest .board"
-             hx-swap="outerHTML">
+             hx-put={ moveUri }>
         </div>
     |]
     where moveUri = T.intercalate "/"

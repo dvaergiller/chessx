@@ -51,7 +51,7 @@ type BoardAPI =
        :> Capture "piece_id" Int
        :> Capture "to_column" Int
        :> Capture "to_row" Int
-       :> Get '[HTMX] Board
+       :> Put '[HTMX] NoContent
 
 type SseAPI = Capture "board_id" BoardId :> RawM
 

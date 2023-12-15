@@ -115,10 +115,8 @@ movePiece :: BoardId
           -> PieceId
           -> PositionCol
           -> PositionRow
-          -> ChessXServer Board
+          -> ChessXServer NoContent
 movePiece bId pId col row = do
-  newBoard <- Game.movePiece bId pId (col, row)
-  piece <- Game.findPiece pId newBoard
+  Game.movePiece bId pId (col, row)
   Game.withServerState $ \state ->
-    notifyGameUpdated bId (Game.sseChannels state) >> return (state, ())
-  return (newBoard { viewAs = Just (team piece) })
+    notifyGameUpdated bId (Game.sseChannels state) >> return (state, NoContent)
