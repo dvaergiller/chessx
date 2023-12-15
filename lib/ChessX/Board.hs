@@ -49,7 +49,7 @@ rowName (_, row) =
 
 columnName :: Position -> Text
 columnName (col, _) =
-  fromMaybe "unknown" . lookup col $ zip [1..8] (map singleton ['A'..'H'])
+  fromMaybe "unknown" . lookup col $ zip [1..8] (map singleton ['a'..'h'])
 
 columnNum :: Position -> Text
 columnNum (col, _) = pack (show col)

@@ -1,19 +1,14 @@
 {-# LANGUAGE QuasiQuotes #-}
 module ChessX.HTMX where
 
-import Prelude hiding (id, div)
-
-import Control.Monad (forM_)
-import Data.Char (toLower)
 import Data.List (intercalate)
-import Data.String (IsString, fromString)
-import qualified Data.Text as T (Text, pack, unpack, toLower, intercalate)
+import qualified Data.Text as T (Text, pack, intercalate)
 import IHP.HSX.QQ
 import Network.HTTP.Media ((//), (/:))
-import Servant
+import Servant (MimeRender(..), toUrlPiece)
 import Servant.API (Accept(..))
-import Text.Blaze.Html5
-import Text.Blaze.Html.Renderer.Utf8
+import Text.Blaze.Html5 hiding (map)
+import Text.Blaze.Html.Renderer.Utf8 (renderHtml)
 
 import ChessX.Board
 
@@ -35,7 +30,7 @@ instance ToMarkup Board where
            hx-swap="outerHTML"
            onclick="htmx.findAll('.moves').forEach(e => e.remove())">
         <div class="pieces">
-          { fmap pieceMarkup ps }
+          { mconcat $ map pieceMarkup ps }
         </div>
       </div>
     |]

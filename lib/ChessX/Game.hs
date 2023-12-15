@@ -73,7 +73,10 @@ createBoard = do
           board = initialBoard bId
       in return (state { boards = M.insert bId board (boards state)}, board)
 
-getBoard :: (MonadIO m, MonadError Error m) => BoardId -> Maybe Team -> GameT m Board
+getBoard :: (MonadIO m, MonadError Error m)
+         => BoardId
+         -> Maybe Team
+         -> GameT m Board
 getBoard bId viewAs = withServerState $ \state ->
   case M.lookup bId (boards state) of
     Nothing ->
