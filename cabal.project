@@ -1,0 +1,7 @@
+source-repository-package
+  type: git
+  location: https://github.com/dvaergiller/ihp.git
+  tag: 0a29831318155ef3912bf4cc0240364513264f6d
+  subdir: ihp-hsx
+
+packages: chessx.cabal
