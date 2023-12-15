@@ -15,7 +15,7 @@ import ChessX.API
 import ChessX.Board
 import ChessX.Error
 import qualified ChessX.Game as Game
-import ChessX.HTMX.Index
+import ChessX.HTMX.IndexPage
 import ChessX.HTMX.BoardPage
 import ChessX.Token
 import ChessX.SSE
@@ -61,7 +61,7 @@ server = pagesServer
 -- Endpoint handlers:
 
 pagesServer :: ServerT PagesAPI ChessXServer
-pagesServer = return Index
+pagesServer = return IndexPage
          :<|> \bId asTeam -> return (BoardPage bId asTeam)
 
 boardServer :: ServerT BoardAPI ChessXServer

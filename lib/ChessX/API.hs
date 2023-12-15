@@ -8,7 +8,7 @@ import Servant.API
 import Web.FormUrlEncoded (FromForm)
 
 import ChessX.HTMX
-import ChessX.HTMX.Index
+import ChessX.HTMX.IndexPage
 import ChessX.HTMX.BoardPage
 import ChessX.Board
 import ChessX.Token
@@ -20,7 +20,7 @@ type API =
   :<|> Raw -- Static files
 
 type PagesAPI =
-       Get '[HTMX] Index
+       Get '[HTMX] IndexPage
   :<|> "board"
      :> QueryParam' '[Required] "board_id" Int
      :> QueryParam' '[Optional] "as" Team

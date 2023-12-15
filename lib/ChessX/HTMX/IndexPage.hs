@@ -1,5 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
-module ChessX.HTMX.Index where
+module ChessX.HTMX.IndexPage where
 
 import IHP.HSX.QQ
 import Servant.API (Accept(..))
@@ -7,10 +7,10 @@ import Text.Blaze.Html5
 
 import ChessX.HTMX.PageTmpl
 
-data Index = Index
+data IndexPage = IndexPage
 
-instance ToMarkup Index where
-  toMarkup Index = pageWith
+instance ToMarkup IndexPage where
+  toMarkup IndexPage = pageWith
     [hsx|
   <main>
     <div class="main-menu">
