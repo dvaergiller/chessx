@@ -32,27 +32,31 @@ instance ToMarkup Index where
             hx-push-url="true"
             hx-target="closest body">
 
-        <label for="player-name">Your name</label>
-        <input id="player-name"
-               class="main-menu-text"
-               name="playerName"
-               required />
-        <input class="custom-radio"
-               name="playerTeam"
-               type="radio"
-               id="white"
-               value="white" />
-        <label id="team-select-white"
-               class="team-select-label"
-               for="white"></label>
-        <input class="custom-radio"
-               name="playerTeam"
-               type="radio"
-               id="black"
-               value="black" />
-        <label id="team-select-black"
-               class="team-select-label"
-               for="black"></label>
+        <div class="input-group">
+          <label for="player-name">Your name</label>
+          <input id="player-name"
+                 class="main-menu-text"
+                 name="playerName"
+                 required />
+        </div>
+        <div class="team-select">
+          <input class="custom-radio"
+                 name="playerTeam"
+                 type="radio"
+                 id="white"
+                 value="white" />
+          <label id="team-select-white"
+                 class="team-select-label"
+                 for="white"></label>
+          <input class="custom-radio"
+                 name="playerTeam"
+                 type="radio"
+                 id="black"
+                 value="black" />
+          <label id="team-select-black"
+                 class="team-select-label"
+                 for="black"></label>
+        </div>
         <button type="submit">Create Board</button>
       </form>
       <input class="custom-radio tab-switch"
@@ -70,12 +74,16 @@ instance ToMarkup Index where
             hx-post="/api/board/join"
             hx-target="main"
             hx-push-url="/board.html">
-         <label for="player-name">Your name</label>
-        <input id="player-name"
-               class="main-menu-text"
-               name="playerName" required />
-        <label for="board-id">Board ID</label>
-        <input id="board-id" class="main-menu-text" name="boardId" required />
+        <div class="input-group">
+          <label for="player-name">Your name</label>
+          <input id="player-name"
+                 class="main-menu-text"
+                 name="playerName" required />
+        </div>
+        <div class="input-group">
+          <label for="board-id">Board ID</label>
+          <input id="board-id" class="main-menu-text" name="boardId" required />
+        </div>
         <button type="submit">Join Board</button>
       </form>
     </div>
