@@ -69,7 +69,7 @@ instance ToMarkup Board where
 
 instance ToMarkup PossibleMoves where
   toMarkup possibleMoves =
-    [hsx|<div class="moves">{ fmap toMarkup (moves possibleMoves) }</div>|]
+    [hsx|<div class="moves">{ mconcat $ map toMarkup (moves possibleMoves) }</div>|]
 
 instance ToMarkup Move where
   toMarkup (Move { boardId = bId, pieceId = pId, to = t }) =
