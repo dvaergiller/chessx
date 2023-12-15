@@ -5,7 +5,7 @@ version:            0.1.0.0
 synopsis:     HTMX Chess Application
 author:       Mattias Jansson
 maintainer:   mattiasjansson@adabeat.com
-license:      GPLv3
+license:      GPL-3.0-or-later
 license-file: LICENSE.md
 copyright:    (C) 2023 Mattias Jansson
 
