@@ -2,11 +2,13 @@ cabal-version:      2.4
 name:               chessx
 version:            0.1.0.0
 
-synopsis:   HTMX Chess Application
-author:     Mattias Jansson
-maintainer: mattiasjansson@adabeat.com
+synopsis:     HTMX Chess Application
+author:       Mattias Jansson
+maintainer:   mattiasjansson@adabeat.com
+license:      GPLv3
+license-file: LICENSE.md
+copyright:    (C) 2023 Mattias Jansson
 
-copyright: (C) 2023 Mattias Jansson
 extra-source-files: public/*
 
 executable chessx
