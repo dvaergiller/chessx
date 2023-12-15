@@ -9,6 +9,7 @@ import Data.Text (Text, pack)
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 import Network.Wai (Middleware, Request(..), mapResponseHeaders)
 import Servant
+import Web.Cookie
 
 import ChessX.API
 import ChessX.Board
@@ -17,8 +18,7 @@ import qualified ChessX.Game as Game
 import ChessX.HTMX.Index
 import ChessX.HTMX.BoardPage
 import ChessX.Token
-import Web.Cookie
-import Debug.Trace
+import ChessX.SSE
 
 type ChessXServer = Game.GameT (ErrorT Handler)
 
@@ -55,6 +55,7 @@ api = Proxy
 server :: ServerT API ChessXServer
 server = pagesServer
     :<|> boardServer
+    :<|> sseHandler
     :<|> serveDirectoryFileServer "public"
 
 -- Endpoint handlers:
@@ -69,6 +70,12 @@ boardServer = makeNewBoard
          :<|> getBoard
          :<|> selectPiece
          :<|> movePiece
+
+sseHandler bId req resp = do
+  chan <- Game.withServerState $ \state -> do
+    (newMap, chan) <- getChannel bId (Game.sseChannels state)
+    return (state { Game.sseChannels = newMap }, chan)
+  liftIO (sseApplication chan req resp)
 
 makeNewBoard ::
      CreateBoardRequest
@@ -89,18 +96,17 @@ joinBoard (JoinBoardRequest bId name) = do
   Game.withBoard bId $ \board -> do
     let team = if isNothing (playerWhite board) then White else Black
     (joined, token) <- Game.joinBoard name team board
-    trace (show joined) (return ())
     return (joined, addHeader  ("/board?board_id=" <> pack (show bId)
                                   <> "&as=" <> toUrlPiece team)
                     NoContent)
 
-getBoard :: Int -> ChessXServer Board
+getBoard :: Int -> Maybe Team -> ChessXServer Board
 getBoard =
   Game.getBoard
 
 selectPiece :: BoardId -> PieceId -> ChessXServer PossibleMoves
 selectPiece bId pId = do
-  board <- Game.getBoard bId
+  board <- Game.getBoard bId Nothing
   Game.validMoves pId board
 
 movePiece :: BoardId
@@ -108,14 +114,9 @@ movePiece :: BoardId
           -> PositionCol
           -> PositionRow
           -> ChessXServer Board
-movePiece bId pId col row = Game.updateBoard bId $ \board -> do
-  (newBoard, piece) <- Game.takePiece pId board
-  let newPiece = piece { position = (col, row), hasMoved = True }
-  let afterCapture =
-        case Game.pieceAt (col, row) board of
-          Just p@(Piece { pieceId = i }) | Game.isOpponent newPiece p ->
-            Game.removePiece i newBoard
-          Nothing ->
-            newBoard
-  return . Game.toggleTurn
-         $ Game.putPiece newPiece afterCapture
+movePiece bId pId col row = do
+  newBoard <- Game.movePiece bId pId (col, row)
+  piece <- Game.findPiece pId newBoard
+  Game.withServerState $ \state ->
+    notifyGameUpdated bId (Game.sseChannels state) >> return (state, ())
+  return (newBoard { viewAs = Just (team piece) })

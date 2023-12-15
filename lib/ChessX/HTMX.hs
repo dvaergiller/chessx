@@ -28,6 +28,9 @@ instance ToMarkup Board where
   toMarkup board@(Board { boardId = bId, turn = trn, pieces = ps }) =
     div ! class_ "board"
         ! attr "turn" trn
+        ! hx "trigger" "sse:gameUpdated"
+        ! hx "get" ("/api/board/" <> T.pack (show bId) <> viewAsQs)
+        ! hx "swap" "outerHTML"
         ! onclick "htmx.findAll('.moves').forEach(e => e.remove())" $ do
         playerMarkup (playerWhite board)
         playerMarkup (playerBlack board)
@@ -39,9 +42,12 @@ instance ToMarkup Board where
                 ! textAttr "row" (rowName pos)
                 ! attr "type" (pieceType piece)
                 ! attr "team" (team piece)
-                !? (trn == team piece, hx "get" (selectUrl piece))
-                !? (trn == team piece, hx "target" "closest .board")
-                !? (trn == team piece, hx "swap" "beforeend")
+                !? (viewAs board == Just trn && trn == team piece,
+                    hx "get" (selectUrl piece))
+                !? (viewAs board == Just trn && trn == team piece,
+                    hx "target" "closest .board")
+                !? (viewAs board == Just trn && trn == team piece,
+                    hx "swap" "beforeend")
                 $ mempty
           selectUrl piece@(Piece { pieceId = pId }) = T.intercalate "/"
             [ "/api/board"
@@ -51,6 +57,10 @@ instance ToMarkup Board where
             ]
           playerMarkup Nothing = return ()
           playerMarkup (Just (Player name team)) = mempty
+          viewAsQs = case viewAs board of
+                       Nothing -> ""
+                       Just White -> "?as=white"
+                       Just Black -> "?as=black"
 
 instance ToMarkup PossibleMoves where
   toMarkup possibleMoves =

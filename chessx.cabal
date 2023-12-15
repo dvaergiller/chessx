@@ -37,6 +37,7 @@ library
       ChessX.HTMX.BoardPage
       ChessX.API
       ChessX.Server
+      ChessX.SSE
       ChessX.Error
       ChessX.Token
     build-depends:
@@ -48,10 +49,10 @@ library
       cookie,
       http-api-data,
       http-media,
-      ihp-hsx ^>= 1.1.0,
+      ihp-hsx ^>= 1.2.0,
       mtl,
       servant,
-      servant-server,
+      servant-server ^>= 0.20,
       random,
       text,
       wai,

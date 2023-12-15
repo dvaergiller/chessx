@@ -68,6 +68,7 @@ data Board = Board
   , playerBlack :: Maybe Player
   , pieces :: [Piece]
   , turn :: Team
+  , viewAs :: Maybe Team
   }
   deriving (Show)
 

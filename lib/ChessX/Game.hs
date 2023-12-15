@@ -17,15 +17,21 @@ import System.Random
 import ChessX.Board
 import ChessX.Error
 import ChessX.Token
+import ChessX.SSE
 
-type ServerState = M.Map BoardId Board
 type StateVar = MVar ServerState
+
+data ServerState = ServerState
+  { boards :: M.Map BoardId Board
+  , sseChannels :: ChannelsMap
+  }
+
 type GameT = ReaderT StateVar
 
 -- Functions for running the game:
 
 initStateVar :: MonadIO m => m StateVar
-initStateVar = liftIO $ newMVar M.empty
+initStateVar = liftIO $ newMVar (ServerState M.empty M.empty)
 
 runGame :: MonadIO m => StateVar -> GameT m a -> m a
 runGame stateVar g = do
@@ -48,10 +54,10 @@ withServerState updater = do
 withBoard :: (MonadIO m, MonadError Error m)
           => BoardId -> (Board -> m (Board, a)) -> GameT m a
 withBoard bId updater = withServerState $ \state -> do
-  let maybeBoard = M.lookup bId state
+  let maybeBoard = M.lookup bId (boards state)
   board <- maybe (throwError $ NotFound "Board not found") return maybeBoard
   (newBoard, toReturn) <- updater board
-  return (M.insert bId newBoard state, toReturn)
+  return (state { boards = M.insert bId newBoard (boards state)}, toReturn)
 
 updateBoard :: (MonadIO m, MonadError Error m)
             => BoardId -> (Board -> m Board) -> GameT m Board
@@ -63,17 +69,34 @@ createBoard :: (MonadIO m, MonadError Error m) => GameT m Board
 createBoard = do
   withServerState $
     \state ->
-      let bId = maybe 1 ((+1) . fst . fst) $ M.maxViewWithKey state
+      let bId = maybe 1 ((+1) . fst . fst) $ M.maxViewWithKey (boards state)
           board = initialBoard bId
-      in return (M.insert bId board state, board)
+      in return (state { boards = M.insert bId board (boards state)}, board)
 
-getBoard :: (MonadIO m, MonadError Error m) => BoardId -> GameT m Board
-getBoard bId = withServerState $ \state ->
-  case M.lookup bId state of
+getBoard :: (MonadIO m, MonadError Error m) => BoardId -> Maybe Team -> GameT m Board
+getBoard bId viewAs = withServerState $ \state ->
+  case M.lookup bId (boards state) of
     Nothing ->
       throwError $ NotFound "Board not found"
     Just board ->
-      return (state, board)
+      return (state, board { viewAs = viewAs })
+
+movePiece :: (MonadIO m, MonadError Error m)
+          => BoardId
+          -> PieceId
+          -> Position
+          -> GameT m Board
+movePiece bId pId pos = updateBoard bId $ \board -> do
+  (newBoard, piece) <- takePiece pId board
+  let newPiece = piece { position = pos, hasMoved = True }
+  let afterCapture =
+        case pieceAt pos board of
+          Just p@(Piece { pieceId = i }) | isOpponent newPiece p ->
+            removePiece i newBoard
+          Nothing ->
+            newBoard
+  return . toggleTurn
+         $ putPiece newPiece afterCapture
 
 -- Board operations:
 
@@ -141,6 +164,7 @@ initialBoard bId = Board
   , playerWhite = Nothing
   , playerBlack = Nothing
   , turn = White
+  , viewAs = Nothing
   , pieces =
     [ Piece 01 White Rook   (1, 1) False
     , Piece 02 White Knight (2, 1) False

@@ -14,8 +14,9 @@ import ChessX.Board
 import ChessX.Token
 
 type API =
-       PagesAPI
+        PagesAPI
   :<|> "api" :> "board" :> BoardAPI
+  :<|> "sse" :> SseAPI
   :<|> Raw -- Static files
 
 type PagesAPI =
@@ -37,6 +38,7 @@ type BoardAPI =
                          NoContent)
 
   :<|> Capture "board_id" BoardId
+       :> QueryParam' '[Optional] "as" Team
        :> Get '[HTMX] Board
 
   :<|> Capture "board_id" BoardId
@@ -50,6 +52,8 @@ type BoardAPI =
        :> Capture "to_column" Int
        :> Capture "to_row" Int
        :> Get '[HTMX] Board
+
+type SseAPI = Capture "board_id" BoardId :> RawM
 
 data CreateBoardRequest = CreateBoardRequest
   { playerName :: Text
