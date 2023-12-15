@@ -16,6 +16,15 @@ data PieceType =
   | King
   deriving (Show, Eq)
 
+instance ToHttpApiData PieceType where
+  toUrlPiece = \case
+    Pawn -> "pawn"
+    Rook -> "rook"
+    Knight -> "knight"
+    Bishop -> "bishop"
+    Queen -> "queen"
+    King -> "king"
+
 data Team = White | Black
   deriving (Show, Eq)
 
